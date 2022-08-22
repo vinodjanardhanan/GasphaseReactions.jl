@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<gaschem>
+	<molefractions>H2=0.25, H2O=0.25, O2=0.25, N2=0.25</molefractions>
+	<T>1173.0</T>
+	<p>1e5</p>
+	<gas_mech>h2o2.dat</gas_mech>
+</gaschem>
