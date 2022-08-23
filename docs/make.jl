@@ -16,6 +16,8 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Theory" => "gchem.md",
+        "Execution" => "run.md"
     ],
 )
 

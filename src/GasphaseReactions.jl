@@ -8,10 +8,12 @@ using RxnHelperUtils
 
 include("Constants.jl")
    
-export compile_gaschemistry
+export compile_gaschemistry, run
 
 """
-compile_gaschemistry(input_file::T) where T <: AbstractString
+compile_gaschemistry(input_file::T) 
+-   input_file : input_file including the path 
+
 Function for reading the gasphase input file. The function returns the
     definition of gasphase mechanism 
 """
@@ -28,6 +30,8 @@ end
 
 """
 read_gaschem!(gasphase_species::Array{T}, input_file::T, lib_dir::T) where T <: AbstractString
+-   gasphase_species : list of species present in the mechanism 
+-   input_file : input file including the path 
 Function for reading the gasphase mechanism file.
     Only chemkin input file is supported     
 """
@@ -142,8 +146,11 @@ function read_gaschem!(gasphase_species::Array{T}, input_file::T) where T <: Abs
     GasphaseMechanism(gasphase_species,reactions,aux_data)    
 end
 
+
+
 """
-Function for converting the activation energy to SI units J/Mol 
+unit_conversion_E(params::Array{Arrhenius}, factor)
+- Function for converting the activation energy to SI units J/Mol 
 """
 function unit_conversion_E(params::Array{Arrhenius}, factor)
     for p in params
@@ -153,7 +160,8 @@ end
 
 
 """
-Function for converting pre-exponential factor to units of moles 
+unit_conversion_A(params::Array{Arrhenius}, factor)
+- Function for converting pre-exponential factor to units of moles 
     the units are in cm-mol-s-K
 """
 function unit_conversion_A(params::Array{Arrhenius}, factor)
@@ -165,7 +173,8 @@ end
 
 
 """
-collect_species!(gasphase_species::Array{T}, data_string::T) where T <: AbstractString
+collect_species!(gasphase_species::Array{T}, data_string::T) 
+-  This function is not for extermal calls 
 function for reading the species present in the gasphase mechanism from the SPECIES .. END block
 """
 function collect_species!(gasphase_species::Array{T}, data_string::T) where T <: AbstractString
@@ -179,7 +188,7 @@ end
 
 """
 function parse_reaction(data_string::AbstractString)
-function for reading the reactions present in the REACTIONS... END block
+- function for reading the reactions present in the REACTIONS... END block
 """
 function parse_reaction(data_string::T, gasphase_species::Array{T}, rxn_id) where T <: AbstractString
     data_string = strip(uppercase(data_string))        
@@ -250,7 +259,7 @@ landau_teller(data_string::AbstractString) = occursin("LT", uppercase(data_strin
 
 """
 clean_up!(species::Array{T}, all_species::Array{T}) where T <: AbstractString
-In the case of fall-off reactions, the reactant and product species may contain 
+- In the case of fall-off reactions, the reactant and product species may contain 
 "(" as part of the species name and this occurs at the end of the name. This
 needs to be cleaned up 
 """
@@ -271,6 +280,7 @@ mutable struct NonAllocatingArray{T <: Real}
     Kp::Array{T}
 end
 export NonAllocatingArray
+
 """
 calculate_molar_production_rates!(ms::MixtureState, gd::GasmechDefinition, thermo_obj)    
 -   ms: State object
@@ -368,7 +378,8 @@ end
 
 
 """
-Function for the calculation of third body collision effciencies.
+third_body_collision(rxn_id::Int64,conc::Array{Float64},tbc_all::Dict{Int64, Dict{Int64, Float64}})
+- Function for the calculation of third body collision effciencies.
     If third body effciency is not specified for a species then that 
         is assumed as 1. If no collision effciencies are specified then 
         [M] is nothing but the concentration of the mixture 
@@ -387,13 +398,14 @@ end
 
 
 """
-calculate the pressure dependent rate
-id: reaction id 
-k : forward reaction rate constant 
-T : mixture temperature
-tb_conc : third body concentration
-low : struct Arrhenius 
-high : struct Arrhenius 
+educed_pressure(id, k, T, conc, low, high)    
+-   calculate the pressure dependent rate
+-   id: reaction id 
+-   k : forward reaction rate constant 
+-   T : mixture temperature
+-   tb_conc : third body concentration
+-   low : struct Arrhenius 
+-   high : struct Arrhenius 
 """
 function reduced_pressure(id, k, T, conc, low, high)    
     
@@ -446,7 +458,8 @@ rate_constant(T::Real, arr::Arrhenius) = arr.k0 * T^arr.β * exp(-arr.E/R/T)
 
 
 """
-Function for parsing the third body collision data 
+parse_third_body_collision_data(gasphase_species::Array{T}, data_string::T)
+-   Function for parsing the third body collision data 
 """
 function parse_third_body_collision_data(gasphase_species::Array{T}, data_string::T) where T <: AbstractString    
     tbc = Dict{Int64,Float64}()
@@ -475,7 +488,7 @@ end
 
 """
 fall_off_species(rxn_string::AbstractString)
-Function to find the species acting as third body in a fall-off
+- Function to find the species acting as third body in a fall-off
 reaction. The species could be (+M) or (+Sp), where sp is any
 species present in the mechanism
 """
@@ -514,6 +527,8 @@ function arrhenius_params(gasphase_reactions::AbstractString)
     rxn = String(gasphase_reactions[findfirst('/',gasphase_reactions)+1:end])    
     return parse_rxn_params(rxn)
 end
+
+
 
 function parse_rev_rxn_params(gasphase_reactions::AbstractString)
     return arrhenius_params(gasphase_reactions)    
@@ -554,7 +569,7 @@ end
 
 """
 modify_coefficients!(args...)
-Chemkin gasphase chemistry allows non unity stoichiometric coefficients.
+- Chemkin gasphase chemistry allows non unity stoichiometric coefficients.
 This function identifies the coefficients of any species that is not 1 and
     modifies the reactant and product species list accordingly
 """
@@ -595,7 +610,9 @@ end
 
 """
 run(input_file::AbstractString, lib_dir::AbstractString) 
-Function to test the gaschem 
+- Function to test the gaschem 
+- input_file : name of the gaschem xml file 
+-  lib_dir : directory in which the mechanism file is present 
 """
 function run(input_file::AbstractString, lib_dir::AbstractString) 
     xmldoc = parse_file(input_file)
