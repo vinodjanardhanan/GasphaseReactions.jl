@@ -3,7 +3,7 @@ using Test
 using RxnHelperUtils
 using IdealGas
 using ReactionCommons
-using LightXML
+using LightXML, Printf
 
 
 @testset "GasphaseReactions.jl" begin
@@ -40,14 +40,14 @@ using LightXML
     ms = GasphaseState(T,p,mole_fracs,conc,rxn_rate,source, g_all, Kp)    
     calculate_molar_production_rates!(ms, gas_mech_def, thermo_obj)
     sum_source = 0.0
-    # println("T, p Conditions ")
-    # println("\nT(K): \t",ms.T)
-    # println("p(Pa): \t", ms.p)
+    println("T, p Conditions ")
+    println("\nT(K): \t",ms.T)
+    println("p(Pa): \t", ms.p)
     for i in 1:length(ms.source)        
-        # @printf("%12s \t %+.4e \t %+.4e\n ", gasphase[i], ms.source[i], ms.source[i]*thermo_obj.molwt[i])
+        @printf("%12s \t %+.4e \t %+.4e\n ", gasphase[i], ms.source[i], ms.source[i]*thermo_obj.molwt[i])
         sum_source += ms.source[i]*thermo_obj.molwt[i]
     end
-    # println("Sum of sources: ", sum_source)
+    println("Sum of sources: ", sum_source)
     @test abs(sum_source) < 1e-9
         
 end
