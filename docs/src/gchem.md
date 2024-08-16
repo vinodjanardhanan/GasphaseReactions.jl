@@ -115,7 +115,7 @@ RORD/H2O 1.0/
 ```
 In the above example, the order of the forward reaction w.r.t $H_2$ is 2. By default the order of the reaction w.r.t the concentration of $H_2$ is 2 due to the value of the stoichiometric coefficient. The additional specification of order 2 w.r.t $H_2$ will make the reaction 4th order w.r.t. H$_2$. In **ReactionEngine** the rate for the above reaction translates into the following 
 ```math
-r = A_f \exp\left(\frac{-E}{RT}\right) [H_2]^2[H_2]^2 - \frac{k_f}{K_c} [H_2O][H_2O]
+r = A_f \exp\left(\frac{-E}{RT}\right) [H_2]^2[H_2]^2[O_2] - \frac{k_f}{K_c} [H_2O][H_2O]
 ```
 
 ### Pressure dependent reactions

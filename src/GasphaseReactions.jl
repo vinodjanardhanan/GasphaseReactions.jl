@@ -319,7 +319,10 @@ function calculate_molar_production_rates!(ms, gd::GasMechDefinition, thermo_obj
         
         # check for fall off reactions
         if rxn.fall_off                                 
-            Pr, k_∞ = reduced_pressure(rxn.id, k_forward, ms.T, third_body_conc, gd.gm.aux_data.low_reactions, gd.gm.aux_data.high_reactions)
+            if length(rxn.reactant_ids) == 1 || length(rxn.product_ids) == 1
+                chk = 1
+            end
+            Pr, k_chk = reduced_pressure(rxn.id, k_forward, ms.T, third_body_conc, gd.gm.aux_data.low_reactions, gd.gm.aux_data.high_reactions, chk)
             # By default Lindemann is assumed i.e. F=1
             F = 1.0            
             # Troe and Sri models are supported for fall off reactions 
@@ -331,7 +334,12 @@ function calculate_molar_production_rates!(ms, gd::GasMechDefinition, thermo_obj
                 F = sri_f(gd.gm.aux_data.sri_reactions[rxn.id], Pr, ms.T)                
             end
             
-            k_forward = k_∞ * (Pr/(1+Pr)) * F  
+            rPr = 1/(1+Pr)
+            if chk == 1
+                rPr = rPr*Pr
+            end
+            
+            k_forward = k_chk * rPr * F  
         end
                 
         # Calcaulate the product of reactant concentrations                
@@ -407,7 +415,7 @@ educed_pressure(id, k, T, conc, low, high)
 -   low : struct Arrhenius 
 -   high : struct Arrhenius 
 """
-function reduced_pressure(id, k, T, conc, low, high)    
+function reduced_pressure(id, k, T, conc, low, high, chk)    
     
     if in(id, collect(keys(low)))
         k0 = rate_constant( T, low[id])
@@ -417,7 +425,11 @@ function reduced_pressure(id, k, T, conc, low, high)
         k∞ = rate_constant(T, high[id])
         k0 = k
     end
-    return k0*conc/k∞, k∞
+    if chk == 1
+        return k0*conc/k∞, k∞
+    else
+        return k0*conc/k∞, k0
+    end
 end
 
 expval(T,TS) = TS == 0 ? 0 : exp(-T/TS)
