@@ -11,10 +11,10 @@ ReactionCommons = "3fc4dfc6-bd63-4703-97f2-4579ab7691c1"
 RxnHelperUtils = "58b8660e-aa37-4837-a287-8893ee0015f8"
 
 [compat]
-IdealGas = "0.1.4"
 LightXML = "0.9.1"
-ReactionCommons = "0.1.8"
+ReactionCommons = "0.1.9"
 RxnHelperUtils = "1.0.0"
+IdealGas = "0.1.5"
 julia = "1.10.4"
 
 [extras]
