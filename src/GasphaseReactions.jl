@@ -317,12 +317,17 @@ function calculate_molar_production_rates!(ms, gd::GasMechDefinition, thermo_obj
             end
         end
         
-        # check for fall off reactions
-        if rxn.fall_off                                 
-            if length(rxn.reactant_ids) == 1 || length(rxn.product_ids) == 1
-                chk = 1
+        #= 
+        Check for fall off reactions
+        in the case of unimolecular fall off, the rate parameters provided on the rxn line is k_∞
+        in the case of bimolecular chemically activated rxn the rate parameters provided on the rxn line is k_0
+        =#
+        if rxn.fall_off
+            unimolecular = false  # whether unimolecular or bimolecular                               
+            if length(rxn.rxn_stoic.reactant_ids) == 1 || length(rxn.rxn_stoic.product_ids) == 1
+                unimolecular = true
             end
-            Pr, k_chk = reduced_pressure(rxn.id, k_forward, ms.T, third_body_conc, gd.gm.aux_data.low_reactions, gd.gm.aux_data.high_reactions, chk)
+            Pr, k_rxnline = reduced_pressure(rxn.id, k_forward, ms.T, third_body_conc, gd.gm.aux_data.low_reactions, gd.gm.aux_data.high_reactions, unimolecular)
             # By default Lindemann is assumed i.e. F=1
             F = 1.0            
             # Troe and Sri models are supported for fall off reactions 
@@ -335,11 +340,11 @@ function calculate_molar_production_rates!(ms, gd::GasMechDefinition, thermo_obj
             end
             
             rPr = 1/(1+Pr)
-            if chk == 1
+            if unimolecular
                 rPr = rPr*Pr
             end
             
-            k_forward = k_chk * rPr * F  
+            k_forward = k_rxnline * rPr * F  
         end
                 
         # Calcaulate the product of reactant concentrations                
@@ -406,26 +411,27 @@ end
 
 
 """
-educed_pressure(id, k, T, conc, low, high)    
--   calculate the pressure dependent rate
+reduced_pressure(id, k, T, conc, low, high)    
+-   calculate the  reduced pressure
 -   id: reaction id 
 -   k : forward reaction rate constant 
 -   T : mixture temperature
 -   tb_conc : third body concentration
 -   low : struct Arrhenius 
 -   high : struct Arrhenius 
+-   unimol : whether unimolecular or bimolecular boolean
 """
-function reduced_pressure(id, k, T, conc, low, high, chk)    
+function reduced_pressure(id, k, T, conc, low, high, unimol)    
     
-    if in(id, collect(keys(low)))
+    if in(id, collect(keys(low))) # if LOW keyword, then its unimolecular fall off
         k0 = rate_constant( T, low[id])
         k∞ = k
     end
-    if in(id, collect(keys(high)))
+    if in(id, collect(keys(high))) # if HIGH keyword, then its bimolecular pressure dependent 
         k∞ = rate_constant(T, high[id])
         k0 = k
     end
-    if chk == 1
+    if unimol
         return k0*conc/k∞, k∞
     else
         return k0*conc/k∞, k0
