@@ -321,6 +321,7 @@ function calculate_molar_production_rates!(ms, gd::GasMechDefinition, thermo_obj
         Check for fall off reactions
         in the case of unimolecular fall off, the rate parameters provided on the rxn line is k_∞
         in the case of bimolecular chemically activated rxn the rate parameters provided on the rxn line is k_0
+        If the reaction is pressure dependent, it must be either unimolecular or bimolecular
         =#
         if rxn.fall_off
             unimolecular = false  # whether unimolecular or bimolecular                               
@@ -422,7 +423,6 @@ reduced_pressure(id, k, T, conc, low, high)
 -   unimol : whether unimolecular or bimolecular boolean
 """
 function reduced_pressure(id, k, T, conc, low, high, unimol)    
-    
     if in(id, collect(keys(low))) # if LOW keyword, then its unimolecular fall off
         k0 = rate_constant( T, low[id])
         k∞ = k

@@ -1,7 +1,7 @@
 name = "GasphaseReactions"
 uuid = "ceedd18c-cbe2-4568-b16d-0e09f1cb20d1"
 authors = ["Vinod Janardhanan"]
-version = "0.1.4"
+version = "0.1.6"
 
 [deps]
 IdealGas = "7aa10a8e-8b87-4952-8d6b-aae44b8b139e"
@@ -11,9 +11,9 @@ ReactionCommons = "3fc4dfc6-bd63-4703-97f2-4579ab7691c1"
 RxnHelperUtils = "58b8660e-aa37-4837-a287-8893ee0015f8"
 
 [compat]
-IdealGas = "0.1.8"
+IdealGas = "0.1.9"
 LightXML = "0.9.1"
-ReactionCommons = "0.2.1"
+ReactionCommons = "0.2.2"
 RxnHelperUtils = "1.0.3"
 julia = "1.9.1"
 
